@@ -127,7 +127,9 @@ function SavedProperties({ properties, onDelete }) {
                     style={{ borderBottom: '1px solid #eee', cursor: 'pointer' }}
                     onClick={() => setSelectedProperty(property)}
                   >
-                    <td style={{ padding: '12px', minWidth: '180px' }}>{property.address || 'N/A'}</td>
+                    <td style={{ padding: '12px', minWidth: '180px' }}>
+                      {property.address || property.assessor_location || 'Address not available'}
+                    </td>
                     <td style={{ padding: '12px' }}>{property.assessor_parcel_number || property.parcel || 'N/A'}</td>
                     <td style={{ padding: '12px', fontWeight: 'bold', color: '#2e7d32' }}>
                       {property.rent_price ? `$${property.rent_price}` : '—'}
