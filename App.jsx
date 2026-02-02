@@ -183,43 +183,33 @@ function App() {
 
   return (
     <div className="app">
-      <div style={{
-        background: '#eff6ff',
-        borderBottom: '2px solid #2563eb',
-        padding: '1em',
-        textAlign: 'center',
-        fontSize: '1.1em',
-        fontWeight: 500,
-        letterSpacing: '0.01em',
-        marginBottom: 0
-      }}>
-        <span>
-          Click this link to search by address and get the property parcel and lot number:{' '}
-          <a href="https://sfplanninggis.org/pim/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline', fontWeight: 700 }}>
-            https://sfplanninggis.org/pim/
-          </a>
-          <br />
-          For a statewide property map, visit{' '}
-          <a href="https://www.sfchronicle.com/projects/2025/ca-property-map/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline', fontWeight: 700 }}>
-            https://www.sfchronicle.com/projects/2025/ca-property-map/
-          </a>
-          <br />
-          <span style={{ color: '#1e40af', fontWeight: 600 }}>Open in Mozilla Firefox for the best viewing experience.</span>
-        </span>
-      </div>
-
       <header className="app-header">
         <div className="header-content">
           <h1 className="app-title">
-            SF Apartment<br />
-            <span className="title-accent">Finder</span>
+            SF Apartment Search Assistant
+            <span className="app-subtitle-inline">Research San Francisco rentals with public property records</span>
           </h1>
-          <p className="app-subtitle">
-            Research San Francisco rentals with public property records
-          </p>
         </div>
         <div className="header-ornament"></div>
       </header>
+
+      <div className="header-links">
+        <div className="links-content">
+          <p>
+            <strong>Find parcel numbers:</strong>{' '}
+            <a href="https://sfplanninggis.org/pim/" target="_blank" rel="noopener noreferrer">
+              SF Planning GIS
+            </a>
+          </p>
+          <p>
+            <strong>Statewide property map:</strong>{' '}
+            <a href="https://www.sfchronicle.com/projects/2025/ca-property-map/" target="_blank" rel="noopener noreferrer">
+              SF Chronicle Property Map
+            </a>
+            {' '}(Best viewed in Firefox)
+          </p>
+        </div>
+      </div>
 
       <nav className="app-nav">
         <button 
