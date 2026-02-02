@@ -132,6 +132,55 @@ function PropertyCard({ property, onSave, onDelete, showSaveButton = false }) {
     );
   };
 
+  // Helper to render Rent Board Unit Details
+  const RentBoardInventorySection = () => {
+    if (!property.rent_board_inventory || !property.rent_board_inventory.units || property.rent_board_inventory.units.length === 0) return null;
+
+    const mostRecent = property.rent_board_inventory.units[0];
+    const utilities = property.rent_board_utilities;
+
+    return (
+      <section className="property-section" style={{ gridColumn: '1 / -1' }}>
+        <h3 className="section-title">
+          <span className="title-icon">🏛️</span>
+          Rent Board Unit Details
+          <span className="count-badge">{property.rent_board_inventory.units_found} units</span>
+        </h3>
+        <div className="section-content" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-sm)' }}>
+          {property.rent_board_monthly_rent && (
+            <InfoRow label="Reported Rent" value={property.rent_board_monthly_rent} highlight />
+          )}
+          {property.rent_board_bedroom_count && (
+            <InfoRow label="Bedrooms" value={property.rent_board_bedroom_count} />
+          )}
+          {property.rent_board_bathroom_count && (
+            <InfoRow label="Bathrooms" value={property.rent_board_bathroom_count} />
+          )}
+          {property.rent_board_square_footage && (
+            <InfoRow label="Square Footage" value={property.rent_board_square_footage} />
+          )}
+          {property.rent_board_occupancy_type && (
+            <InfoRow label="Occupancy" value={property.rent_board_occupancy_type} />
+          )}
+          {property.rent_board_neighborhood && (
+            <InfoRow label="Neighborhood" value={property.rent_board_neighborhood} />
+          )}
+        </div>
+        {utilities && (
+          <div style={{ marginTop: 'var(--space-md)', padding: 'var(--space-sm)', background: '#f0f8ff', borderRadius: '4px' }}>
+            <strong style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>Utilities Included in Rent:</strong>
+            <div style={{ display: 'flex', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
+              <span>{utilities.water_sewer ? '✅' : '❌'} Water/Sewer</span>
+              <span>{utilities.natural_gas ? '✅' : '❌'} Gas</span>
+              <span>{utilities.electricity ? '✅' : '❌'} Electricity</span>
+              <span>{utilities.refuse_recycling ? '✅' : '❌'} Trash/Recycling</span>
+            </div>
+          </div>
+        )}
+      </section>
+    );
+  };
+
   // Helper to render eviction history
   const EvictionHistorySection = () => {
     const evictions = property.eviction_history;
@@ -267,6 +316,9 @@ function PropertyCard({ property, onSave, onDelete, showSaveButton = false }) {
 
       {/* Listing Amenities from Craigslist */}
       <AmenitiesSection />
+
+      {/* Rent Board Unit Details */}
+      <RentBoardInventorySection />
 
       <div className="property-grid">
         <section className="property-section">

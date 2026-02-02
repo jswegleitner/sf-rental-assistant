@@ -285,6 +285,51 @@ def get_rent_board_info(address=None, parcel=None):
         print(f"Rent Board info error: {e}")
         return None
 
+def get_rent_board_housing_inventory(address=None, parcel=None):
+    """
+    Query SF Rent Board Housing Inventory for unit-level details.
+    Dataset: Rent Board Housing Inventory
+    API: https://data.sfgov.org/resource/gdc7-dmcn.json
+    Returns: Unit details including rent, bedrooms, bathrooms, square footage, utilities
+    """
+    try:
+        url = "https://data.sfgov.org/resource/gdc7-dmcn.json"
+        params = {'$limit': 50, '$order': 'submission_year DESC'}
+        
+        if parcel:
+            # Try to match by block number
+            block, lot = parcel.split('/') if '/' in parcel else (parcel, None)
+            block = block.zfill(4)
+            params['block_num'] = block
+        elif address:
+            # Try to match by address in block_address field
+            norm_addr = normalize_address(address.split(',')[0])
+            addr_parts = norm_addr.split()
+            
+            if len(addr_parts) >= 2:
+                street_number = addr_parts[0]
+                street_name = ' '.join(addr_parts[1:])
+                params['$where'] = f"UPPER(block_address) LIKE UPPER('%{street_name}%')"
+        else:
+            return None
+        
+        response = requests.get(url, params=params, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data and len(data) > 0:
+                return {
+                    'units_found': len(data),
+                    'units': data,
+                    'total_units': data[0].get('unit_count') if data else None
+                }
+        
+        return None
+        
+    except Exception as e:
+        print(f"Rent Board Housing Inventory error: {e}")
+        return None
+
 def get_eviction_history(address=None, parcel=None):
     """
     Get eviction notices/filings for a property.
@@ -856,6 +901,49 @@ def get_property_details(address=None, parcel=None, debug=False):
     # Query SF Rent Board for official rent control status
     # ============================================================
     rent_board_info = get_rent_board_info(address=address, parcel=parcel)
+    
+    # ============================================================
+    # Query SF Rent Board Housing Inventory for unit details
+    # ============================================================
+    rent_board_inventory = get_rent_board_housing_inventory(address=address, parcel=parcel)
+    
+    # Cross-reference and merge inventory data
+    if rent_board_inventory and rent_board_inventory.get('units'):
+        property_data['rent_board_inventory'] = rent_board_inventory
+        units = rent_board_inventory['units']
+        
+        # Aggregate unit-level data
+        if units:
+            # Get most recent submission
+            most_recent = units[0]
+            
+            # Extract useful data that we don't already have
+            property_data['rent_board_bedroom_count'] = most_recent.get('bedroom_count')
+            property_data['rent_board_bathroom_count'] = most_recent.get('bathroom_count')
+            property_data['rent_board_square_footage'] = most_recent.get('square_footage')
+            property_data['rent_board_monthly_rent'] = most_recent.get('monthly_rent')
+            property_data['rent_board_occupancy_type'] = most_recent.get('occupancy_type')
+            property_data['rent_board_utilities'] = {
+                'water_sewer': most_recent.get('base_rent_includes_water_sewer') == 'Y',
+                'natural_gas': most_recent.get('base_rent_includes_natural_gas') == 'Y',
+                'electricity': most_recent.get('base_rent_includes_electricity') == 'Y',
+                'refuse_recycling': most_recent.get('base_rent_includes_refuse_recycling') == 'Y'
+            }
+            property_data['rent_board_year_built'] = most_recent.get('year_property_built')
+            property_data['rent_board_neighborhood'] = most_recent.get('analysis_neighborhood')
+            property_data['rent_board_supervisor_district'] = most_recent.get('supervisor_district')
+            
+            # Cross-reference with existing data
+            # If we don't have bedrooms/bathrooms, use rent board data
+            if property_data.get('number_of_bedrooms') == 'Not available' and most_recent.get('bedroom_count'):
+                property_data['number_of_bedrooms'] = most_recent.get('bedroom_count')
+            
+            if property_data.get('number_of_bathrooms') == 'Not available' and most_recent.get('bathroom_count'):
+                property_data['number_of_bathrooms'] = most_recent.get('bathroom_count')
+            
+            # If we don't have year built, use rent board data
+            if (not year_built or year_built == 'Not available') and most_recent.get('year_property_built'):
+                property_data['year_built'] = most_recent.get('year_property_built')
     
     # Determine rent control status with priority:
     # 1. Official Rent Board data (most authoritative)
