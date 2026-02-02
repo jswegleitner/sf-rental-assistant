@@ -6,8 +6,8 @@
 
 /* Header */
 .app-header {
-  background: linear-gradient(135deg, var(--color-ink) 0%, #2d2621 100%);
-  color: var(--color-paper);
+  background: linear-gradient(135deg, #e8f1f5 0%, #d1e3f0 100%);
+  color: var(--color-ink);
   padding: var(--space-xl) var(--space-lg);
   position: relative;
   overflow: hidden;
@@ -30,7 +30,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
-  color: #1e40af;
+  color: #2563eb;
 }
 
 .app-subtitle-inline {

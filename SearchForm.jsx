@@ -130,6 +130,16 @@ function SearchForm({ onSearch, loading }) {
         <p>Search by street address or parcel/lot number</p>
       </div>
 
+      <div className="search-tips" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none', marginBottom: 'var(--space-md)' }}>
+        <h3>Tips for best results:</h3>
+        <ul>
+          <li><strong>Searching by parcel/lot number is much more reliable</strong> - use SF Planning GIS link above to find it</li>
+          <li>Include full street number and name when searching by address</li>
+          <li>Double-check address spelling</li>
+          <li>Only San Francisco addresses are supported</li>
+        </ul>
+      </div>
+
       <form onSubmit={handleSubmit} className="search-form">
         <div className="form-group" style={{ position: 'relative' }}>
           <label htmlFor="address" className="form-label">
@@ -233,7 +243,7 @@ function SearchForm({ onSearch, loading }) {
           {urlType === 'zillow' && (
             <div className="url-type-indicator zillow">
               <span className="indicator-icon">ℹ</span>
-              <span>Zillow URL - enter address below for property data</span>
+              <span>Zillow detected - we can't extract data from Zillow, but you can enter the address above</span>
             </div>
           )}
         </div>
@@ -247,17 +257,11 @@ function SearchForm({ onSearch, loading }) {
       </form>
 
       <div className="search-tips">
-        <h3>Tips for best results:</h3>
-        <ul>
-          <li>Include street number and name</li>
-          <li>Double-check address spelling</li>
-          <li>Only San Francisco addresses are supported</li>
-        </ul>
         <h3 className="tips-section-header">Data Sources:</h3>
         <ul className="data-sources-list">
           <li><strong>SF Rent Board:</strong> Official rent control & eviction data</li>
-          <li><strong>Craigslist:</strong> Parking, laundry, pet policies (when URL provided)</li>
-          <li><strong>SF Assessor:</strong> Owner, property type, year built</li>
+          <li><strong>Craigslist:</strong> Parking, laundry, pet policies (only when Craigslist URL provided)</li>
+          <li><strong>SF Assessor:</strong> Property type, year built, units</li>
           <li><strong>Housing Complaints:</strong> Building violations history</li>
         </ul>
       </div>
