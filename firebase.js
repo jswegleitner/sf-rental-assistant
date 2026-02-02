@@ -34,6 +34,46 @@ export const getUserId = () => {
   return userId;
 };
 
+// Set custom user ID
+export const setUserId = (newUserId) => {
+  if (newUserId && newUserId.trim()) {
+    const sanitized = newUserId.trim().replace(/[.#$\[\]]/g, '_');
+    localStorage.setItem('sf-rental-user-id', sanitized);
+    return sanitized;
+  }
+  return getUserId();
+};
+
+// Update last active timestamp
+export const updateLastActive = async () => {
+  if (!database) return;
+  try {
+    const userId = getUserId();
+    await set(ref(database, `users/${userId}/lastActive`), Date.now());
+  } catch (error) {
+    console.error('Error updating last active:', error);
+  }
+};
+
+// Clean up inactive users (30 days)
+export const cleanupInactiveData = async () => {
+  if (!database) return;
+  try {
+    const userId = getUserId();
+    const snapshot = await get(ref(database, `users/${userId}/lastActive`));
+    const lastActive = snapshot.exists() ? snapshot.val() : Date.now();
+    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    
+    if (lastActive < thirtyDaysAgo) {
+      // Data is older than 30 days, clear it
+      await set(ref(database, `users/${userId}`), null);
+      console.log('Cleaned up inactive user data');
+    }
+  } catch (error) {
+    console.error('Error cleaning up data:', error);
+  }
+};
+
 // Save properties to Firebase
 export const savePropertiesToFirebase = async (properties) => {
   if (!database) return;
@@ -89,4 +129,4 @@ export const onPropertiesChange = (callback) => {
   }
 };
 
-export default { getUserId, savePropertiesToFirebase, getPropertiesFromFirebase, deletePropertyFromFirebase, onPropertiesChange };
+export default { getUserId, setUserId, savePropertiesToFirebase, getPropertiesFromFirebase, deletePropertyFromFirebase, onPropertiesChange, updateLastActive, cleanupInactiveData };

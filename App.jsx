@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SearchForm from './SearchForm';
 import PropertyCard from './PropertyCard';
 import SavedProperties from './SavedProperties';
-import { getUserId, savePropertiesToFirebase, getPropertiesFromFirebase, deletePropertyFromFirebase, onPropertiesChange } from './firebase';
+import { getUserId, setUserId, savePropertiesToFirebase, getPropertiesFromFirebase, deletePropertyFromFirebase, onPropertiesChange, updateLastActive, cleanupInactiveData } from './firebase';
 import './App.css';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -14,13 +14,18 @@ function App() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('search');
   const [debugInfo, setDebugInfo] = useState(null);
-  const [userId, setUserId] = useState('');
+  const [userId, setUserIdState] = useState('');
+  const [editingUserId, setEditingUserId] = useState(false);
+  const [tempUserId, setTempUserId] = useState('');
   const [syncStatus, setSyncStatus] = useState('loading'); // 'loading', 'synced', 'error'
 
   useEffect(() => {
     const id = getUserId();
-    setUserId(id);
+    setUserIdState(id);
     loadProperties();
+    
+    // Clean up old data on load
+    cleanupInactiveData();
 
     // Listen for real-time Firebase changes
     const unsubscribe = onPropertiesChange((firebaseProperties) => {
@@ -29,6 +34,7 @@ function App() {
         // Also save to localStorage
         localStorage.setItem('sf-rental-properties', JSON.stringify(firebaseProperties));
         setSyncStatus('synced');
+        updateLastActive();
       }
     });
 
@@ -120,6 +126,7 @@ function App() {
       
       // Save to Firebase (async)
       await savePropertiesToFirebase(updatedProperties);
+      await updateLastActive();
       setSyncStatus('synced');
       
       alert('Property saved successfully!');
@@ -142,6 +149,7 @@ function App() {
       
       // Delete from Firebase
       await deletePropertyFromFirebase(propertyId);
+      await updateLastActive();
       setSyncStatus('synced');
     } catch (err) {
       console.error('Failed to delete property:', err);
@@ -207,9 +215,48 @@ function App() {
           )}
         </button>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85em', color: '#666' }}>
-          <span title={`Your sync ID: ${userId}\nCopy this to sync across devices`} style={{ cursor: 'help' }}>
-            🔑 ID: {userId.substring(0, 8)}...
-          </span>
+          {editingUserId ? (
+            <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+              <input
+                type="text"
+                value={tempUserId}
+                onChange={(e) => setTempUserId(e.target.value)}
+                placeholder="Enter sync ID"
+                style={{ padding: '4px 8px', fontSize: '0.85em', border: '1px solid #ccc', borderRadius: '4px', width: '150px' }}
+              />
+              <button
+                onClick={() => {
+                  const newId = setUserId(tempUserId);
+                  setUserIdState(newId);
+                  setEditingUserId(false);
+                  window.location.reload(); // Reload to sync with new ID
+                }}
+                style={{ padding: '4px 8px', fontSize: '0.85em', background: '#c14d28', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+              >
+                Save
+              </button>
+              <button
+                onClick={() => {
+                  setEditingUserId(false);
+                  setTempUserId('');
+                }}
+                style={{ padding: '4px 8px', fontSize: '0.85em', background: '#999', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <span
+              onClick={() => {
+                setEditingUserId(true);
+                setTempUserId(userId);
+              }}
+              title="Click to edit sync ID. Use same ID on all devices to sync."
+              style={{ cursor: 'pointer', padding: '4px 8px', background: '#f5f5f5', borderRadius: '4px', border: '1px solid #ddd' }}
+            >
+              🔑 ID: {userId.length > 12 ? userId.substring(0, 12) + '...' : userId}
+            </span>
+          )}
           <span title={syncStatus === 'synced' ? 'Synced with cloud' : syncStatus === 'error' ? 'Sync error' : 'Loading...'}>
             {syncStatus === 'synced' ? '☁️ Synced' : syncStatus === 'error' ? '⚠️ Offline' : '⏳ Loading'}
           </span>
