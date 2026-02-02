@@ -95,6 +95,13 @@ function App() {
         property.listing_url = url;
       }
       
+      // Extract rent price from listing amenities
+      if (property.listing_amenities && property.listing_amenities.listing_price) {
+        // Remove $ and convert to number for sorting
+        const priceStr = property.listing_amenities.listing_price.replace(/[$,]/g, '');
+        property.rent_price = priceStr;
+      }
+      
       if (property && property.debug && property.debug.parcel_raw && Array.isArray(property.debug.parcel_raw) && property.debug.parcel_raw[0]) {
         const raw = property.debug.parcel_raw[0];
         if (raw.centroid_latitude && raw.centroid_longitude) {
