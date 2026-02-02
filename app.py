@@ -1009,6 +1009,8 @@ def get_property_details(address=None, parcel=None, debug=False):
         debug_info['rent_board_raw'] = rent_board_info if rent_board_info else 'No Rent Board data returned'
         debug_info['eviction_raw'] = eviction_history if eviction_history else 'No eviction data returned'
         debug_info['complaints_raw'] = housing_complaints if housing_complaints else 'No complaint data returned'
+        debug_info['_spacer'] = '\n\n=== RENT BOARD HOUSING INVENTORY ===\n'
+        debug_info['rent_board_inventory_raw'] = rent_board_inventory if rent_board_inventory else 'No Rent Board Housing Inventory data returned'
         property_data['debug'] = debug_info
     return property_data
 
