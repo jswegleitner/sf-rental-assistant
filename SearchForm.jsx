@@ -127,62 +127,10 @@ function SearchForm({ onSearch, loading }) {
     <div className="search-form-container">
       <div className="search-form-header">
         <h2>Find Property Information</h2>
-        <p>Paste a listing URL or enter a San Francisco address</p>
+        <p>Search by street address or parcel/lot number</p>
       </div>
 
       <form onSubmit={handleSubmit} className="search-form">
-                <div className="form-divider">
-                  <span>or</span>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="parcel" className="form-label">
-                    Parcel/Lot Number
-                    <span className="label-hint">Format: BLOCK/LOT (e.g. 1234/567)</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="parcel"
-                    className="form-input"
-                    placeholder="1234/567"
-                    value={parcel}
-                    onChange={handleParcelChange}
-                    disabled={loading}
-                    autoComplete="off"
-                  />
-                </div>
-        <div className="form-group">
-          <label htmlFor="url" className="form-label">
-            Listing URL
-            <span className="label-hint">from Craigslist, Zillow, etc.</span>
-          </label>
-          <input
-            type="text"
-            id="url"
-            className={`form-input ${urlType ? `url-type-${urlType}` : ''}`}
-            placeholder="https://sfbay.craigslist.org/..."
-            value={url}
-            onChange={handleUrlChange}
-            disabled={loading}
-          />
-          {urlType === 'craigslist' && (
-            <div className="url-type-indicator craigslist">
-              <span className="indicator-icon">✓</span>
-              <span>Craigslist detected - will extract parking, laundry & pet info</span>
-            </div>
-          )}
-          {urlType === 'zillow' && (
-            <div className="url-type-indicator zillow">
-              <span className="indicator-icon">ℹ</span>
-              <span>Zillow URL - enter address below for property data</span>
-            </div>
-          )}
-        </div>
-
-        <div className="form-divider">
-          <span>or</span>
-        </div>
-
         <div className="form-group" style={{ position: 'relative' }}>
           <label htmlFor="address" className="form-label">
             Street Address
@@ -237,7 +185,58 @@ function SearchForm({ onSearch, loading }) {
             </ul>
           )}
         </div>
+        <div className="form-divider">
+          <span>or</span>
+        </div>
 
+        <div className="form-group">
+          <label htmlFor="parcel" className="form-label">
+            Parcel/Lot Number
+            <span className="label-hint">Format: BLOCK/LOT (e.g. 1234/567)</span>
+          </label>
+          <input
+            type="text"
+            id="parcel"
+            className="form-input"
+            placeholder="1234/567"
+            value={parcel}
+            onChange={handleParcelChange}
+            disabled={loading}
+            autoComplete="off"
+          />
+        </div>
+
+        <div className="form-divider">
+          <span>Optional: Add listing for amenities data</span>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="url" className="form-label">
+            Listing URL
+            <span className="label-hint">from Craigslist, Zillow, etc.</span>
+          </label>
+          <input
+            type="text"
+            id="url"
+            className={`form-input ${urlType ? `url-type-${urlType}` : ''}`}
+            placeholder="https://sfbay.craigslist.org/..."
+            value={url}
+            onChange={handleUrlChange}
+            disabled={loading}
+          />
+          {urlType === 'craigslist' && (
+            <div className="url-type-indicator craigslist">
+              <span className="indicator-icon">✓</span>
+              <span>Craigslist detected - will extract parking, laundry & pet info</span>
+            </div>
+          )}
+          {urlType === 'zillow' && (
+            <div className="url-type-indicator zillow">
+              <span className="indicator-icon">ℹ</span>
+              <span>Zillow URL - enter address below for property data</span>
+            </div>
+          )}
+        </div>
         <button 
           type="submit" 
           className="search-button"

@@ -1,12 +1,12 @@
 :root {
-  /* Editorial-inspired color palette */
-  --color-paper: #fdfbf7;
+  /* Editorial-inspired color palette with blue tones */
+  --color-paper: #f7fbfd;
   --color-ink: #1a1614;
-  --color-accent: #c14d28;
-  --color-accent-light: #e8775a;
+  --color-accent: #2563eb;
+  --color-accent-light: #60a5fa;
   --color-sage: #7a8e7e;
-  --color-stone: #aea99f;
-  --color-cream: #f5f0e8;
+  --color-stone: #9fa9ae;
+  --color-cream: #e8f1f5;
   --color-shadow: rgba(26, 22, 20, 0.1);
   
   /* Typography */

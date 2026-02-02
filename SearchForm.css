@@ -63,7 +63,7 @@
   outline: none;
   border-color: var(--color-accent);
   background: white;
-  box-shadow: 0 0 0 3px rgba(193, 77, 40, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .form-input:disabled {
@@ -120,13 +120,13 @@
   transition: all 0.2s ease;
   margin-top: var(--space-sm);
   border: none;
-  box-shadow: 0 2px 8px rgba(193, 77, 40, 0.2);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
 }
 
 .search-button:hover:not(:disabled) {
   background: var(--color-accent-light);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(193, 77, 40, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .search-button:active:not(:disabled) {

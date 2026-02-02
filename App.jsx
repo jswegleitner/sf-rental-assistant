@@ -184,8 +184,8 @@ function App() {
   return (
     <div className="app">
       <div style={{
-        background: '#fffbe6',
-        borderBottom: '2px solid #c14d28',
+        background: '#eff6ff',
+        borderBottom: '2px solid #2563eb',
         padding: '1em',
         textAlign: 'center',
         fontSize: '1.1em',
@@ -195,16 +195,16 @@ function App() {
       }}>
         <span>
           Click this link to search by address and get the property parcel and lot number:{' '}
-          <a href="https://sfplanninggis.org/pim/" target="_blank" rel="noopener noreferrer" style={{ color: '#c14d28', textDecoration: 'underline', fontWeight: 700 }}>
+          <a href="https://sfplanninggis.org/pim/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline', fontWeight: 700 }}>
             https://sfplanninggis.org/pim/
           </a>
           <br />
           For a statewide property map, visit{' '}
-          <a href="https://www.sfchronicle.com/projects/2025/ca-property-map/" target="_blank" rel="noopener noreferrer" style={{ color: '#c14d28', textDecoration: 'underline', fontWeight: 700 }}>
+          <a href="https://www.sfchronicle.com/projects/2025/ca-property-map/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline', fontWeight: 700 }}>
             https://www.sfchronicle.com/projects/2025/ca-property-map/
           </a>
           <br />
-          <span style={{ color: '#b42318', fontWeight: 600 }}>Open in Mozilla Firefox for the best viewing experience.</span>
+          <span style={{ color: '#1e40af', fontWeight: 600 }}>Open in Mozilla Firefox for the best viewing experience.</span>
         </span>
       </div>
 

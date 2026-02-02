@@ -54,7 +54,7 @@ function SavedProperties({ properties, onDelete }) {
               onClick={() => setViewMode('table')} 
               style={{ 
                 padding: '8px 16px', 
-                background: viewMode === 'table' ? '#c14d28' : '#ddd', 
+                background: viewMode === 'table' ? '#2563eb' : '#ddd', 
                 color: viewMode === 'table' ? 'white' : '#333',
                 border: 'none', 
                 borderRadius: '4px', 
@@ -67,7 +67,7 @@ function SavedProperties({ properties, onDelete }) {
               onClick={() => setViewMode('cards')} 
               style={{ 
                 padding: '8px 16px', 
-                background: viewMode === 'cards' ? '#c14d28' : '#ddd', 
+                background: viewMode === 'cards' ? '#2563eb' : '#ddd', 
                 color: viewMode === 'cards' ? 'white' : '#333',
                 border: 'none', 
                 borderRadius: '4px', 
@@ -105,8 +105,9 @@ function SavedProperties({ properties, onDelete }) {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
             <thead>
-              <tr style={{ background: '#f5f0e8', borderBottom: '2px solid #c14d28' }}>
+              <tr style={{ background: '#e8f1f5', borderBottom: '2px solid #2563eb' }}>
                 <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold', minWidth: '180px' }}>Address</th>
+                <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold' }}>Unit</th>
                 <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold' }}>Parcel</th>
                 <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold' }}>Rent</th>
                 <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold' }}>Year</th>
@@ -129,6 +130,9 @@ function SavedProperties({ properties, onDelete }) {
                   >
                     <td style={{ padding: '12px', minWidth: '180px' }}>
                       {property.address || property.assessor_location || 'Address not available'}
+                    </td>
+                    <td style={{ padding: '12px', fontWeight: '600', color: '#2563eb' }}>
+                      {property.unit_number || '—'}
                     </td>
                     <td style={{ padding: '12px' }}>{property.assessor_parcel_number || property.parcel || 'N/A'}</td>
                     <td style={{ padding: '12px', fontWeight: 'bold', color: '#2e7d32' }}>
@@ -185,7 +189,7 @@ function SavedProperties({ properties, onDelete }) {
                             target="_blank" 
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            style={{ color: '#c14d28', textDecoration: 'none', fontWeight: 'bold' }}
+                            style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 'bold' }}
                           >
                             🔗 View
                           </a>

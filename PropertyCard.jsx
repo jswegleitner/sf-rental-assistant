@@ -270,7 +270,6 @@ function PropertyCard({ property, onSave, onDelete, showSaveButton = false }) {
         <section className="property-section">
           <h3 className="section-title">Ownership & Type</h3>
           <div className="section-content">
-            <InfoRow label="Owner" value={property.owner} highlight />
             <InfoRow label="Property Type" value={property.property_type} />
             <InfoRow label="Number of Units" value={property.num_units} />
             <InfoRow label="Bedrooms" value={property.number_of_bedrooms} />
@@ -283,20 +282,12 @@ function PropertyCard({ property, onSave, onDelete, showSaveButton = false }) {
           <h3 className="section-title">Building Details</h3>
           <div className="section-content">
             <InfoRow label="Street Address" value={property.address} />
+            {property.unit_number && <InfoRow label="Unit Number" value={property.unit_number} highlight />}
             <InfoRow label="Parcel/Lot Number" value={property.assessor_parcel_number || property.parcel || 'Not available'} />
             <InfoRow label="Year Built" value={property.year_built} />
             <InfoRow label="Lot Size" value={property.assessor_property_area || property.lot_size} />
             <InfoRow label="Zoning" value={property.zoning} />
             <InfoRow label="Classification" value={property.classification} />
-          </div>
-        </section>
-
-        <section className="property-section">
-          <h3 className="section-title">Financial</h3>
-          <div className="section-content">
-            <InfoRow label="Assessed Value" value={property.assessed_value} />
-            <InfoRow label="Last Sale Date" value={property.last_sale_date} />
-            <InfoRow label="Last Sale Price" value={property.last_sale_price} />
           </div>
         </section>
 

@@ -577,6 +577,21 @@ def normalize_address(address):
     
     return ' '.join(parts)
 
+def extract_unit_number(property_location):
+    """Extract unit number from property_location field.
+    Format: '0000 2989 JACKSON             ST0001'
+    Returns: '1' or None
+    """
+    if not property_location or not isinstance(property_location, str):
+        return None
+    
+    # Match pattern: street type (2 letters) followed by digits
+    match = re.search(r'\b([A-Z]{2})(\d{4})$', property_location.strip())
+    if match:
+        unit_num = match.group(2).lstrip('0')  # Remove leading zeros
+        return unit_num if unit_num else None
+    return None
+
 def get_parcel_info(address=None, parcel=None, debug=False):
     """Get parcel information from SF Assessor data by address or parcel/lot"""
     try:
@@ -803,6 +818,14 @@ def get_property_details(address=None, parcel=None, debug=False):
     }
     property_data.update(landuse_fields)
     property_data.update(assessor_fields)
+    
+    # Extract unit number from assessor_location if available
+    if assessor_data and assessor_data.get('property_location'):
+        unit_num = extract_unit_number(assessor_data.get('property_location'))
+        property_data['unit_number'] = f"Unit {unit_num}" if unit_num else None
+    else:
+        property_data['unit_number'] = None
+    
     # Add Classification field from Land Use restype
     if landuse_info and landuse_info.get('restype'):
         property_data['classification'] = landuse_info.get('restype')
