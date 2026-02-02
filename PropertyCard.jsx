@@ -291,7 +291,12 @@ function PropertyCard({ property, onSave, onDelete, showSaveButton = false }) {
             <InfoRow label="Rooms" value={property.number_of_rooms} />
             <InfoRow 
               label="Rent" 
-              value={property.rent_price ? `$${property.rent_price}/month` : property.manual_rent || 'Not available'}
+              value={
+                property.rent_price ? `$${property.rent_price}/month` : 
+                property.manual_rent ? 
+                  ((property.manual_rent.startsWith('$') ? property.manual_rent : `$${property.manual_rent}`) + '/month') : 
+                  'Not available'
+              }
               highlight={!!property.rent_price || !!property.manual_rent}
             />
             <InfoRow 

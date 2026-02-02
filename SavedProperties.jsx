@@ -136,7 +136,9 @@ function SavedProperties({ properties, onDelete }) {
                     </td>
                     <td style={{ padding: '12px' }}>{property.assessor_parcel_number || property.parcel || 'N/A'}</td>
                     <td style={{ padding: '12px', fontWeight: 'bold', color: '#2e7d32' }}>
-                      {property.rent_price ? `$${property.rent_price}` : property.manual_rent || '—'}
+                      {property.rent_price ? `$${property.rent_price}` : 
+                       property.manual_rent ? (property.manual_rent.startsWith('$') ? property.manual_rent : `$${property.manual_rent}`) : 
+                       '—'}
                     </td>
                     <td style={{ padding: '12px' }}>{property.year_built || 'N/A'}</td>
                     <td style={{ padding: '12px' }}>
