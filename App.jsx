@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SearchForm from './SearchForm';
 import PropertyCard from './PropertyCard';
 import SavedProperties from './SavedProperties';
+import { getUserId, savePropertiesToFirebase, getPropertiesFromFirebase, deletePropertyFromFirebase, onPropertiesChange } from './firebase';
 import './App.css';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -13,18 +14,49 @@ function App() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('search');
   const [debugInfo, setDebugInfo] = useState(null);
+  const [userId, setUserId] = useState('');
+  const [syncStatus, setSyncStatus] = useState('loading'); // 'loading', 'synced', 'error'
 
   useEffect(() => {
-    fetchSavedProperties();
+    const id = getUserId();
+    setUserId(id);
+    loadProperties();
+
+    // Listen for real-time Firebase changes
+    const unsubscribe = onPropertiesChange((firebaseProperties) => {
+      if (firebaseProperties) {
+        setSavedProperties(firebaseProperties);
+        // Also save to localStorage
+        localStorage.setItem('sf-rental-properties', JSON.stringify(firebaseProperties));
+        setSyncStatus('synced');
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const fetchSavedProperties = async () => {
+  const loadProperties = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/properties`);
-      const data = await response.json();
-      setSavedProperties(data);
+      // First load from localStorage (instant)
+      const localData = localStorage.getItem('sf-rental-properties');
+      if (localData) {
+        setSavedProperties(JSON.parse(localData));
+      }
+
+      // Then sync with Firebase
+      const firebaseData = await getPropertiesFromFirebase();
+      if (firebaseData) {
+        setSavedProperties(firebaseData);
+        localStorage.setItem('sf-rental-properties', JSON.stringify(firebaseData));
+        setSyncStatus('synced');
+      } else if (!localData) {
+        // No data anywhere, initialize empty
+        setSavedProperties([]);
+        setSyncStatus('synced');
+      }
     } catch (err) {
-      console.error('Failed to fetch saved properties:', err);
+      console.error('Failed to load properties:', err);
+      setSyncStatus('error');
     }
   };
 
@@ -71,31 +103,50 @@ function App() {
 
   const handleSaveProperty = async (property) => {
     try {
-      const response = await fetch(`${API_URL}/api/properties`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(property),
-      });
+      // Add timestamp and ID if not present
+      const propertyToSave = {
+        ...property,
+        id: property.id || Date.now(),
+        saved_at: new Date().toISOString()
+      };
 
-      const savedProperty = await response.json();
-      setSavedProperties([...savedProperties, savedProperty]);
+      const updatedProperties = [...savedProperties, propertyToSave];
+      
+      // Save to state
+      setSavedProperties(updatedProperties);
+      
+      // Save to localStorage (instant)
+      localStorage.setItem('sf-rental-properties', JSON.stringify(updatedProperties));
+      
+      // Save to Firebase (async)
+      await savePropertiesToFirebase(updatedProperties);
+      setSyncStatus('synced');
+      
       alert('Property saved successfully!');
     } catch (err) {
-      alert('Failed to save property');
+      console.error('Failed to save property:', err);
+      setSyncStatus('error');
+      alert('Property saved locally, but cloud sync failed');
     }
   };
 
   const handleDeleteProperty = async (propertyId) => {
     try {
-      await fetch(`${API_URL}/api/properties/${propertyId}`, {
-        method: 'DELETE',
-      });
-
-      setSavedProperties(savedProperties.filter(p => p.id !== propertyId));
+      const updatedProperties = savedProperties.filter(p => p.id !== propertyId);
+      
+      // Update state
+      setSavedProperties(updatedProperties);
+      
+      // Save to localStorage
+      localStorage.setItem('sf-rental-properties', JSON.stringify(updatedProperties));
+      
+      // Delete from Firebase
+      await deletePropertyFromFirebase(propertyId);
+      setSyncStatus('synced');
     } catch (err) {
-      alert('Failed to delete property');
+      console.error('Failed to delete property:', err);
+      setSyncStatus('error');
+      alert('Property deleted locally, but cloud sync failed');
     }
   };
 
@@ -155,6 +206,14 @@ function App() {
             <span className="nav-badge">{savedProperties.length}</span>
           )}
         </button>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85em', color: '#666' }}>
+          <span title={`Your sync ID: ${userId}\nCopy this to sync across devices`} style={{ cursor: 'help' }}>
+            🔑 ID: {userId.substring(0, 8)}...
+          </span>
+          <span title={syncStatus === 'synced' ? 'Synced with cloud' : syncStatus === 'error' ? 'Sync error' : 'Loading...'}>
+            {syncStatus === 'synced' ? '☁️ Synced' : syncStatus === 'error' ? '⚠️ Offline' : '⏳ Loading'}
+          </span>
+        </div>
       </nav>
 
       <main className="app-main">
