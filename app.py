@@ -65,8 +65,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 
 app = Flask(__name__)
-
-# ============================================================
+CORS(app, origins=["https://jswegleitner.github.io", "http://localhost:5173"])
 # CRAIGSLIST PARSING FUNCTIONS
 # ============================================================
 
