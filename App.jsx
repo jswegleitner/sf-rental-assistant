@@ -18,6 +18,7 @@ function App() {
   const [editingUserId, setEditingUserId] = useState(false);
   const [tempUserId, setTempUserId] = useState('');
   const [syncStatus, setSyncStatus] = useState('loading'); // 'loading', 'synced', 'error'
+  const [showDebug, setShowDebug] = useState(false);
 
   useEffect(() => {
     const id = getUserId();
@@ -88,6 +89,12 @@ function App() {
       }
       // Extract lat/lon for map if available
       let property = data.data || data;
+      
+      // Add listing URL to property if provided
+      if (url) {
+        property.listing_url = url;
+      }
+      
       if (property && property.debug && property.debug.parcel_raw && Array.isArray(property.debug.parcel_raw) && property.debug.parcel_raw[0]) {
         const raw = property.debug.parcel_raw[0];
         if (raw.centroid_latitude && raw.centroid_longitude) {
@@ -109,10 +116,13 @@ function App() {
 
   const handleSaveProperty = async (property) => {
     try {
+      // Remove debug data before saving (contains invalid Firebase keys like $limit)
+      const { debug, ...propertyWithoutDebug } = property;
+      
       // Add timestamp and ID if not present
       const propertyToSave = {
-        ...property,
-        id: property.id || Date.now(),
+        ...propertyWithoutDebug,
+        id: propertyWithoutDebug.id || Date.now(),
         saved_at: new Date().toISOString()
       };
 
@@ -121,10 +131,10 @@ function App() {
       // Save to state
       setSavedProperties(updatedProperties);
       
-      // Save to localStorage (instant)
+      // Save to localStorage (instant, can include debug)
       localStorage.setItem('sf-rental-properties', JSON.stringify(updatedProperties));
       
-      // Save to Firebase (async)
+      // Save to Firebase (async, without debug data)
       await savePropertiesToFirebase(updatedProperties);
       await updateLastActive();
       setSyncStatus('synced');
@@ -291,8 +301,28 @@ function App() {
                 />
                 {debugInfo && (
                   <div style={{ margin: '2em 0', background: '#f9f9f9', border: '1px solid #ccc', padding: '1em', borderRadius: 8 }}>
-                    <h4>Debug Info (Raw DataSF API Response)</h4>
-                    <pre style={{ fontSize: 12, overflowX: 'auto' }}>{JSON.stringify(debugInfo, null, 2)}</pre>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <h4 style={{ margin: 0 }}>Debug Info (Raw DataSF API Response)</h4>
+                      <button
+                        onClick={() => setShowDebug(!showDebug)}
+                        style={{
+                          padding: '6px 12px',
+                          background: '#c14d28',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '0.9em'
+                        }}
+                      >
+                        {showDebug ? '▼ Hide' : '► Show'}
+                      </button>
+                    </div>
+                    {showDebug && (
+                      <pre style={{ fontSize: 12, overflowX: 'auto', maxHeight: '400px', overflow: 'auto' }}>
+                        {JSON.stringify(debugInfo, null, 2)}
+                      </pre>
+                    )}
                   </div>
                 )}
               </>
