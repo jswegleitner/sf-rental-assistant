@@ -780,7 +780,11 @@ def get_property_details(address=None, parcel=None, debug=False):
             'landuse_the_geom': landuse_info.get('the_geom'),
         }
     property_data = {
-        'address': address or parcel_info.get('address', ''),
+        'address': address or (
+            f"{parcel_info.get('from_address_num', '')} {parcel_info.get('street_name', '')} {parcel_info.get('street_type', '')}".strip() 
+            if parcel_info.get('from_address_num') 
+            else parcel_info.get('address', '')
+        ),
         'owner': owner,
         'property_type': property_type,
         'year_built': year_built,
