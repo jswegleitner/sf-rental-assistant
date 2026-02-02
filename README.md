@@ -1,5 +1,7 @@
 # SF Apartment Finder
 
+🌐 **[Live App](https://jswegleitner.github.io/sf-rental-assistant/)**
+
 A web app to help you research San Francisco apartments by looking up property records, ownership, and building information.
 
 ## Features
