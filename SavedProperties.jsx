@@ -9,10 +9,10 @@ function SavedProperties({ properties, onDelete }) {
   const [selectedProperty, setSelectedProperty] = React.useState(null);
   const [listingStatus, setListingStatus] = React.useState({});
 
-  // Check if Craigslist listings are still live
+  // Check if listings are still live
   React.useEffect(() => {
     properties.forEach(async (property) => {
-      if (property.listing_url && property.listing_url.includes('craigslist.org')) {
+      if (property.listing_url) {
         try {
           const response = await fetch(property.listing_url, { method: 'HEAD', mode: 'no-cors' });
           // no-cors doesn't give us status, so we assume it's live if no error
@@ -136,30 +136,30 @@ function SavedProperties({ properties, onDelete }) {
                     </td>
                     <td style={{ padding: '12px' }}>{property.assessor_parcel_number || property.parcel || 'N/A'}</td>
                     <td style={{ padding: '12px', fontWeight: 'bold', color: '#2e7d32' }}>
-                      {property.rent_price ? `$${property.rent_price}` : '—'}
+                      {property.rent_price ? `$${property.rent_price}` : property.manual_rent || '—'}
                     </td>
                     <td style={{ padding: '12px' }}>{property.year_built || 'N/A'}</td>
                     <td style={{ padding: '12px' }}>
-                      {amenities.laundry ? (
-                        <span title={amenities.laundry}>
-                          {amenities.laundry === 'W/D in unit' ? '✅ In Unit' :
-                           amenities.laundry === 'Laundry on site' ? '🔵 On Site' :
-                           amenities.laundry === 'Laundry in building' ? '🔵 In Bldg' :
-                           amenities.laundry === 'No laundry on site' ? '❌ None' :
-                           amenities.laundry}
+                      {(amenities.laundry || property.manual_laundry) ? (
+                        <span title={amenities.laundry || property.manual_laundry}>
+                          {(amenities.laundry === 'W/D in unit' || property.manual_laundry === 'W/D in unit') ? '✅ In Unit' :
+                           (amenities.laundry === 'Laundry on site' || property.manual_laundry === 'Laundry on site') ? '🔵 On Site' :
+                           (amenities.laundry === 'Laundry in building' || property.manual_laundry === 'Laundry in building') ? '🔵 In Bldg' :
+                           (amenities.laundry === 'No laundry on site' || property.manual_laundry === 'No laundry on site') ? '❌ None' :
+                           (amenities.laundry || property.manual_laundry)}
                         </span>
                       ) : '—'}
                     </td>
                     <td style={{ padding: '12px' }}>
-                      {amenities.parking ? (
-                        <span title={amenities.parking}>
-                          {amenities.parking === 'Off-street parking' ? '✅ Off-St' :
-                           amenities.parking === 'Street parking' ? '🅿️ Street' :
-                           amenities.parking === 'Attached garage' ? '✅ Garage' :
-                           amenities.parking === 'Detached garage' ? '🚗 Det. Gar' :
-                           amenities.parking === 'Carport' ? '🚗 Carport' :
-                           amenities.parking === 'No parking' ? '❌ None' :
-                           amenities.parking}
+                      {(amenities.parking || property.manual_parking) ? (
+                        <span title={amenities.parking || property.manual_parking}>
+                          {(amenities.parking === 'Off-street parking' || property.manual_parking === 'Off-street parking') ? '✅ Off-St' :
+                           (amenities.parking === 'Street parking' || property.manual_parking === 'Street parking') ? '🅿️ Street' :
+                           (amenities.parking === 'Attached garage' || property.manual_parking === 'Attached garage') ? '✅ Garage' :
+                           (amenities.parking === 'Detached garage' || property.manual_parking === 'Detached garage') ? '🚗 Det. Gar' :
+                           (amenities.parking === 'Carport' || property.manual_parking === 'Carport') ? '🚗 Carport' :
+                           (amenities.parking === 'No parking' || property.manual_parking === 'No parking') ? '❌ None' :
+                           (amenities.parking || property.manual_parking)}
                         </span>
                       ) : '—'}
                     </td>
