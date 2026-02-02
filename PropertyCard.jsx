@@ -237,7 +237,9 @@ function PropertyCard({ property, onSave, onDelete, showSaveButton = false }) {
       
       <div className="property-header">
         <div>
-          <h2 className="property-address">{property.address}</h2>
+          <h2 className="property-address">
+            {property.address}{property.unit_number ? ` ${property.unit_number}` : ''}
+          </h2>
           {property.listing_amenities?.listing_title && (
             <p className="listing-title">{property.listing_amenities.listing_title}</p>
           )}
@@ -268,17 +270,6 @@ function PropertyCard({ property, onSave, onDelete, showSaveButton = false }) {
 
       <div className="property-grid">
         <section className="property-section">
-          <h3 className="section-title">Ownership & Type</h3>
-          <div className="section-content">
-            <InfoRow label="Property Type" value={property.property_type} />
-            <InfoRow label="Number of Units" value={property.num_units} />
-            <InfoRow label="Bedrooms" value={property.number_of_bedrooms} />
-            <InfoRow label="Bathrooms" value={property.number_of_bathrooms} />
-            <InfoRow label="Rooms" value={property.number_of_rooms} />
-          </div>
-        </section>
-
-        <section className="property-section">
           <h3 className="section-title">Building Details</h3>
           <div className="section-content">
             <InfoRow label="Street Address" value={property.address} />
@@ -292,8 +283,32 @@ function PropertyCard({ property, onSave, onDelete, showSaveButton = false }) {
         </section>
 
         <section className="property-section">
+          <h3 className="section-title">Building Specifics</h3>
+          <div className="section-content">
+            <InfoRow label="Number of Units" value={property.num_units} />
+            <InfoRow label="Bedrooms" value={property.number_of_bedrooms} />
+            <InfoRow label="Bathrooms" value={property.number_of_bathrooms} />
+            <InfoRow label="Rooms" value={property.number_of_rooms} />
+            <InfoRow 
+              label="Rent" 
+              value={property.rent_price ? `$${property.rent_price}/month` : property.manual_rent || 'Not available'}
+              highlight={!!property.rent_price || !!property.manual_rent}
+            />
+            <InfoRow 
+              label="W/D" 
+              value={property.listing_amenities?.laundry || property.manual_laundry || 'Not available'} 
+            />
+            <InfoRow 
+              label="Parking" 
+              value={property.listing_amenities?.parking || property.manual_parking || 'Not available'} 
+            />
+          </div>
+        </section>
+
+        <section className="property-section">
           <h3 className="section-title">Tenant Protections</h3>
           <div className="section-content">
+            <InfoRow label="Property Type" value={property.property_type} />
             <InfoRow 
               label="Rent Control" 
               value={property.rent_controlled} 

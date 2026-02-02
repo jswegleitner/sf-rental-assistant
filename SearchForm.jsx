@@ -6,6 +6,9 @@ function SearchForm({ onSearch, loading }) {
   const [url, setUrl] = useState('');
   const [address, setAddress] = useState('');
   const [parcel, setParcel] = useState('');
+  const [manualRent, setManualRent] = useState('');
+  const [manualLaundry, setManualLaundry] = useState('');
+  const [manualParking, setManualParking] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
@@ -114,12 +117,17 @@ function SearchForm({ onSearch, loading }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const manualAmenities = {
+      manual_rent: manualRent,
+      manual_laundry: manualLaundry,
+      manual_parking: manualParking
+    };
     if (url) {
-      onSearch(url, address, parcel);
+      onSearch(url, address, parcel, manualAmenities);
     } else if (parcel) {
-      onSearch(url, '', parcel);
+      onSearch(url, '', parcel, manualAmenities);
     } else if (address && addressValid) {
-      onSearch(url, address, '');
+      onSearch(url, address, '', manualAmenities);
     }
   };
 
@@ -247,6 +255,64 @@ function SearchForm({ onSearch, loading }) {
             </div>
           )}
         </div>
+
+        <div className="form-divider">
+          <span>Optional: Manual Amenities</span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-md)' }}>
+          <div className="form-group">
+            <label htmlFor="manualRent" className="form-label">
+              Rent
+            </label>
+            <input
+              type="text"
+              id="manualRent"
+              className="form-input"
+              placeholder="e.g. $2500"
+              value={manualRent}
+              onChange={(e) => setManualRent(e.target.value)}
+              disabled={loading}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="manualLaundry" className="form-label">
+              W/D
+            </label>
+            <select
+              id="manualLaundry"
+              className="form-input"
+              value={manualLaundry}
+              onChange={(e) => setManualLaundry(e.target.value)}
+              disabled={loading}
+            >
+              <option value="">Select...</option>
+              <option value="W/D in unit">W/D in unit</option>
+              <option value="Laundry on site">Laundry on site</option>
+              <option value="Laundry in building">Laundry in building</option>
+              <option value="No laundry on site">No laundry</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="manualParking" className="form-label">
+              Parking
+            </label>
+            <select
+              id="manualParking"
+              className="form-input"
+              value={manualParking}
+              onChange={(e) => setManualParking(e.target.value)}
+              disabled={loading}
+            >
+              <option value="">Select...</option>
+              <option value="Off-street parking">Off-street</option>
+              <option value="Attached garage">Garage</option>
+              <option value="Street parking">Street parking</option>
+              <option value="No parking">No parking</option>
+            </select>
+          </div>
+        </div>
+
         <button 
           type="submit" 
           className="search-button"

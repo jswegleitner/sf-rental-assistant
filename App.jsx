@@ -67,7 +67,7 @@ function App() {
     }
   };
 
-  const handleSearch = async (url, address, parcel) => {
+  const handleSearch = async (url, address, parcel, manualAmenities = {}) => {
     setLoading(true);
     setError(null);
     setCurrentProperty(null);
@@ -93,6 +93,17 @@ function App() {
       // Add listing URL to property if provided
       if (url) {
         property.listing_url = url;
+      }
+      
+      // Add manual amenities if provided
+      if (manualAmenities.manual_rent) {
+        property.manual_rent = manualAmenities.manual_rent;
+      }
+      if (manualAmenities.manual_laundry) {
+        property.manual_laundry = manualAmenities.manual_laundry;
+      }
+      if (manualAmenities.manual_parking) {
+        property.manual_parking = manualAmenities.manual_parking;
       }
       
       // Extract rent price from listing amenities
