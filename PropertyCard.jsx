@@ -390,6 +390,9 @@ function PropertyCard({ property, onSave, onDelete, showSaveButton = false }) {
         </section>
       </div>
 
+      {/* Rent Board Unit Details */}
+      <RentBoardInventorySection />
+
       {/* Eviction History Details */}
       <EvictionHistorySection />
 

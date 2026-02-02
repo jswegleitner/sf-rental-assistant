@@ -294,29 +294,31 @@ def get_rent_board_housing_inventory(address=None, parcel=None):
     """
     try:
         url = "https://data.sfgov.org/resource/gdc7-dmcn.json"
-        params = {'$limit': 50, '$order': 'submission_year DESC'}
+        params = {'$limit': 10, '$order': 'submission_year DESC'}
         
         if parcel:
-            # Try to match by block number
-            block, lot = parcel.split('/') if '/' in parcel else (parcel, None)
+            # Try to match by block number (first 4 digits of parcel)
+            block = parcel.split('/')[0] if '/' in parcel else parcel[:4]
             block = block.zfill(4)
             params['block_num'] = block
+            print(f"Querying Rent Board Inventory for block: {block}")
         elif address:
-            # Try to match by address in block_address field
+            # Try to match by address - extract street name
             norm_addr = normalize_address(address.split(',')[0])
             addr_parts = norm_addr.split()
-            
             if len(addr_parts) >= 2:
-                street_number = addr_parts[0]
                 street_name = ' '.join(addr_parts[1:])
                 params['$where'] = f"UPPER(block_address) LIKE UPPER('%{street_name}%')"
+                print(f"Querying Rent Board Inventory for street: {street_name}")
         else:
             return None
         
         response = requests.get(url, params=params, timeout=10)
+        print(f"Rent Board Inventory API response status: {response.status_code}")
         
         if response.status_code == 200:
             data = response.json()
+            print(f"Rent Board Inventory found {len(data)} records")
             if data and len(data) > 0:
                 return {
                     'units_found': len(data),
@@ -328,6 +330,8 @@ def get_rent_board_housing_inventory(address=None, parcel=None):
         
     except Exception as e:
         print(f"Rent Board Housing Inventory error: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 def get_eviction_history(address=None, parcel=None):
