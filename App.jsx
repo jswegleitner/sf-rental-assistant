@@ -126,6 +126,12 @@ function App() {
       // Remove debug data before saving (contains invalid Firebase keys like $limit)
       const { debug, ...propertyWithoutDebug } = property;
       
+      // Ensure critical fields are present
+      if (propertyWithoutDebug.listing_amenities && propertyWithoutDebug.listing_amenities.listing_price && !propertyWithoutDebug.rent_price) {
+        const priceStr = propertyWithoutDebug.listing_amenities.listing_price.replace(/[$,]/g, '');
+        propertyWithoutDebug.rent_price = priceStr;
+      }
+      
       // Add timestamp and ID if not present
       const propertyToSave = {
         ...propertyWithoutDebug,
