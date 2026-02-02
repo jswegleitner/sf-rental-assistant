@@ -997,6 +997,21 @@ def delete_property(property_id):
     
     return jsonify({'message': 'Property deleted'}), 200
 
+@app.route('/', methods=['GET'])
+def root():
+    """Root endpoint - API info"""
+    return jsonify({
+        'name': 'SF Rental Assistant API',
+        'version': '1.0',
+        'status': 'running',
+        'endpoints': {
+            'search': '/api/search',
+            'properties': '/api/properties',
+            'parse_listing': '/api/parse-listing',
+            'health': '/health'
+        }
+    }), 200
+
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
