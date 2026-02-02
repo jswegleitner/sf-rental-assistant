@@ -18,10 +18,16 @@ let app;
 let database;
 
 try {
+  console.log('Initializing Firebase with config:', {
+    ...firebaseConfig,
+    apiKey: firebaseConfig.apiKey ? '***' : 'MISSING'
+  });
   app = initializeApp(firebaseConfig);
   database = getDatabase(app);
+  console.log('Firebase initialized successfully');
 } catch (error) {
   console.error('Firebase initialization error:', error);
+  alert('Firebase connection failed. Data will only be saved locally. Error: ' + error.message);
 }
 
 // Get or create user ID (stored in localStorage)
@@ -76,22 +82,35 @@ export const cleanupInactiveData = async () => {
 
 // Save properties to Firebase
 export const savePropertiesToFirebase = async (properties) => {
-  if (!database) return;
+  if (!database) {
+    console.warn('Firebase not initialized, skipping save');
+    return false;
+  }
   try {
     const userId = getUserId();
+    console.log('Saving to Firebase for user:', userId, 'Properties count:', properties.length);
     await set(ref(database, `users/${userId}/properties`), properties);
+    console.log('Successfully saved to Firebase');
+    return true;
   } catch (error) {
     console.error('Error saving to Firebase:', error);
+    return false;
   }
 };
 
 // Get properties from Firebase
 export const getPropertiesFromFirebase = async () => {
-  if (!database) return null;
+  if (!database) {
+    console.warn('Firebase not initialized, cannot load');
+    return null;
+  }
   try {
     const userId = getUserId();
+    console.log('Loading from Firebase for user:', userId);
     const snapshot = await get(ref(database, `users/${userId}/properties`));
-    return snapshot.exists() ? snapshot.val() : null;
+    const data = snapshot.exists() ? snapshot.val() : null;
+    console.log('Loaded from Firebase:', data ? `${data.length} properties` : 'no data');
+    return data;
   } catch (error) {
     console.error('Error getting from Firebase:', error);
     return null;
@@ -115,12 +134,17 @@ export const deletePropertyFromFirebase = async (propertyId) => {
 
 // Listen to Firebase changes (for real-time sync across tabs/devices)
 export const onPropertiesChange = (callback) => {
-  if (!database) return () => {};
+  if (!database) {
+    console.warn('Firebase not initialized, cannot listen to changes');
+    return () => {};
+  }
   try {
     const userId = getUserId();
+    console.log('Setting up Firebase listener for user:', userId);
     const propertiesRef = ref(database, `users/${userId}/properties`);
     return onValue(propertiesRef, (snapshot) => {
       const data = snapshot.exists() ? snapshot.val() : [];
+      console.log('Firebase data changed:', data ? `${data.length} properties` : 'empty');
       callback(data);
     });
   } catch (error) {
