@@ -1,0 +1,241 @@
+.search-form-container {
+  background: white;
+  border: var(--border-width) solid var(--color-stone);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  box-shadow: 0 4px 24px var(--color-shadow);
+}
+
+.search-form-header {
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-cream);
+}
+
+.search-form-header h2 {
+  font-size: 1.75rem;
+  margin-bottom: var(--space-xs);
+  color: var(--color-ink);
+}
+
+.search-form-header p {
+  color: var(--color-stone);
+  font-size: 0.95rem;
+}
+
+.search-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.form-label {
+  font-weight: 600;
+  color: var(--color-ink);
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.label-hint {
+  font-weight: 400;
+  color: var(--color-stone);
+  font-size: 0.85rem;
+}
+
+.form-input {
+  padding: var(--space-md);
+  border: 2px solid var(--color-cream);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: var(--color-paper);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(193, 77, 40, 0.1);
+}
+
+.form-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-input::placeholder {
+  color: var(--color-stone);
+  opacity: 0.6;
+}
+
+.form-divider {
+  text-align: center;
+  position: relative;
+  margin: var(--space-sm) 0;
+}
+
+.form-divider::before,
+.form-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 45%;
+  height: 1px;
+  background: var(--color-cream);
+}
+
+.form-divider::before {
+  left: 0;
+}
+
+.form-divider::after {
+  right: 0;
+}
+
+.form-divider span {
+  background: white;
+  padding: 0 var(--space-sm);
+  color: var(--color-stone);
+  font-size: 0.875rem;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+}
+
+.search-button {
+  background: var(--color-accent);
+  color: white;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  margin-top: var(--space-sm);
+  border: none;
+  box-shadow: 0 2px 8px rgba(193, 77, 40, 0.2);
+}
+
+.search-button:hover:not(:disabled) {
+  background: var(--color-accent-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(193, 77, 40, 0.3);
+}
+
+.search-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.search-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.search-tips {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-cream);
+}
+
+.search-tips h3 {
+  font-size: 1rem;
+  margin-bottom: var(--space-sm);
+  color: var(--color-sage);
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+
+.search-tips ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.search-tips li {
+  color: var(--color-stone);
+  font-size: 0.9rem;
+  padding-left: var(--space-md);
+  position: relative;
+}
+
+.search-tips li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--color-accent);
+}
+
+@media (max-width: 768px) {
+  .search-form-container {
+    padding: var(--space-md);
+  }
+  
+  .search-form-header h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* ============================================================
+   URL TYPE INDICATOR STYLES
+   ============================================================ */
+
+.form-input.url-type-craigslist {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.form-input.url-type-zillow {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.url-type-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  margin-top: var(--space-xs);
+}
+
+.url-type-indicator.craigslist {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.url-type-indicator.zillow {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #3b82f6;
+}
+
+.indicator-icon {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+/* ============================================================
+   DATA SOURCES LIST STYLES
+   ============================================================ */
+
+.tips-section-header {
+  margin-top: var(--space-md);
+}
+
+.data-sources-list li {
+  font-size: 0.85rem;
+}
+
+.data-sources-list strong {
+  color: var(--color-ink);
+}

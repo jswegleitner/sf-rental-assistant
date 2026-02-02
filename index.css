@@ -1,0 +1,83 @@
+:root {
+  /* Editorial-inspired color palette */
+  --color-paper: #fdfbf7;
+  --color-ink: #1a1614;
+  --color-accent: #c14d28;
+  --color-accent-light: #e8775a;
+  --color-sage: #7a8e7e;
+  --color-stone: #aea99f;
+  --color-cream: #f5f0e8;
+  --color-shadow: rgba(26, 22, 20, 0.1);
+  
+  /* Typography */
+  --font-display: 'Crimson Pro', serif;
+  --font-body: 'DM Sans', sans-serif;
+  
+  /* Spacing */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2.5rem;
+  --space-xl: 4rem;
+  
+  /* Borders */
+  --border-width: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input, textarea {
+  font-family: var(--font-body);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-cream);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-stone);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-sage);
+}
+
+/* Selection */
+::selection {
+  background: var(--color-accent-light);
+  color: white;
+}
