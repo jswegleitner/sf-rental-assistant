@@ -1,14 +1,11 @@
 # SF Apartment Finder
 
-🌐 **[Live App](https://jswegleitner.github.io/sf-rental-assistant/)**
-
 A web app to help you research San Francisco apartments by looking up property records, ownership, and building information.
 
 ## Features
 
 - Add apartment listings from Craigslist, Zillow, or any site
 - **NEW: Craigslist Integration** - Automatically extracts parking, laundry, pet policies, and more from Craigslist listings
-- **NEW: Cross-Device Sync** - Save properties with localStorage + Firebase cloud sync
 - Automatically fetch property information from SF Open Data
 - View property owner, year built, type, and more
 - **NEW: SF Rent Board Data** - Official rent control verification from the SF Rent Board
@@ -23,7 +20,6 @@ A web app to help you research San Francisco apartments by looking up property r
 
 - **Frontend**: React with Vite
 - **Backend**: Python Flask
-- **Storage**: Firebase Realtime Database + localStorage
 - **APIs**: SF Open Data Portal (DataSF)
 
 ## Data Sources
@@ -75,30 +71,15 @@ The backend will run on `http://localhost:5000`
 
 ### Frontend Setup
 
-1. Install dependencies:
+1. Navigate to the frontend directory:
+```bash
+cd frontend
+```
+
+2. Install dependencies:
 ```bash
 npm install
 ```
-
-2. **Set up Firebase (for cross-device sync):**
-   - Go to [Firebase Console](https://console.firebase.google.com/)
-   - Create a new project (free Spark plan)
-   - Enable **Realtime Database**
-   - Set database rules (Database → Rules):
-   ```json
-   {
-     "rules": {
-       "users": {
-         "$userId": {
-           ".read": true,
-           ".write": true
-         }
-       }
-     }
-   }
-   ```
-   - Get your config: Project Settings → General → Your apps → Web app
-   - Copy `.env.example` to `.env` and add your Firebase credentials
 
 3. Run the development server:
 ```bash
@@ -114,13 +95,6 @@ The frontend will run on `http://localhost:5173`
 3. Paste a listing URL or enter an address
 4. Click "Search" to fetch property information
 5. View detailed property records and save properties to compare
-6. **Saved properties sync across devices** - Your unique sync ID is shown in the navigation bar
-
-## Storage & Sync
-
-- **localStorage**: Instant save on your device, works offline
-- **Firebase**: Cloud sync across all your devices (free tier: 1GB storage, 10GB/month bandwidth)
-- Your sync ID is auto-generated and stored in localStorage - you can share it between devices to sync your saved properties
 
 ## API Endpoints
 

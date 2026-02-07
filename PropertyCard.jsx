@@ -134,49 +134,146 @@ function PropertyCard({ property, onSave, onDelete, showSaveButton = false }) {
 
   // Helper to render Rent Board Unit Details
   const RentBoardInventorySection = () => {
+    const [expandedUnits, setExpandedUnits] = React.useState(new Set([0])); // Expand first unit by default
+
     if (!property.rent_board_inventory || !property.rent_board_inventory.units || property.rent_board_inventory.units.length === 0) return null;
 
-    const mostRecent = property.rent_board_inventory.units[0];
-    const utilities = property.rent_board_utilities;
+    const units = property.rent_board_inventory.units;
+    const blockAddress = property.rent_board_inventory.block_address;
+
+    const toggleUnit = (index) => {
+      const newExpanded = new Set(expandedUnits);
+      if (newExpanded.has(index)) {
+        newExpanded.delete(index);
+      } else {
+        newExpanded.add(index);
+      }
+      setExpandedUnits(newExpanded);
+    };
+
+    const toggleAll = () => {
+      if (expandedUnits.size === units.length) {
+        setExpandedUnits(new Set());
+      } else {
+        setExpandedUnits(new Set(units.map((_, i) => i)));
+      }
+    };
 
     return (
       <section className="property-section" style={{ gridColumn: '1 / -1' }}>
         <h3 className="section-title">
           <span className="title-icon">🏛️</span>
-          Rent Board Unit Details
-          <span className="count-badge">{property.rent_board_inventory.units_found} units</span>
+          Rent Board Housing Inventory
+          <span className="count-badge">{units.length} unit{units.length !== 1 ? 's' : ''}</span>
         </h3>
-        <div className="section-content" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-sm)' }}>
-          {property.rent_board_monthly_rent && (
-            <InfoRow label="Reported Rent" value={property.rent_board_monthly_rent} highlight />
-          )}
-          {property.rent_board_bedroom_count && (
-            <InfoRow label="Bedrooms" value={property.rent_board_bedroom_count} />
-          )}
-          {property.rent_board_bathroom_count && (
-            <InfoRow label="Bathrooms" value={property.rent_board_bathroom_count} />
-          )}
-          {property.rent_board_square_footage && (
-            <InfoRow label="Square Footage" value={property.rent_board_square_footage} />
-          )}
-          {property.rent_board_occupancy_type && (
-            <InfoRow label="Occupancy" value={property.rent_board_occupancy_type} />
-          )}
-          {property.rent_board_neighborhood && (
-            <InfoRow label="Neighborhood" value={property.rent_board_neighborhood} />
-          )}
-        </div>
-        {utilities && (
-          <div style={{ marginTop: 'var(--space-md)', padding: 'var(--space-sm)', background: '#f0f8ff', borderRadius: '4px' }}>
-            <strong style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>Utilities Included in Rent:</strong>
-            <div style={{ display: 'flex', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
-              <span>{utilities.water_sewer ? '✅' : '❌'} Water/Sewer</span>
-              <span>{utilities.natural_gas ? '✅' : '❌'} Gas</span>
-              <span>{utilities.electricity ? '✅' : '❌'} Electricity</span>
-              <span>{utilities.refuse_recycling ? '✅' : '❌'} Trash/Recycling</span>
-            </div>
+        {blockAddress && (
+          <div style={{ marginBottom: 'var(--space-sm)', fontSize: '0.9em', color: '#666' }}>
+            <strong>Location:</strong> {blockAddress}
           </div>
         )}
+        {units.length > 1 && (
+          <button
+            onClick={toggleAll}
+            style={{
+              marginBottom: 'var(--space-sm)',
+              padding: '6px 12px',
+              fontSize: '0.85em',
+              background: '#f0f0f0',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            {expandedUnits.size === units.length ? 'Collapse All' : 'Expand All'}
+          </button>
+        )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+          {units.map((unit, index) => {
+            const isExpanded = expandedUnits.has(index);
+            const utilities = {
+              water_sewer: unit.base_rent_includes_water_sewer === 'Y',
+              natural_gas: unit.base_rent_includes_natural_gas === 'Y',
+              electricity: unit.base_rent_includes_electricity === 'Y',
+              refuse_recycling: unit.base_rent_includes_refuse_recycling === 'Y'
+            };
+
+            return (
+              <div
+                key={index}
+                style={{
+                  border: '1px solid #ddd',
+                  borderRadius: '6px',
+                  overflow: 'hidden',
+                  background: isExpanded ? '#ffffff' : '#fafafa'
+                }}
+              >
+                {/* Unit Header - Always visible, clickable */}
+                <div
+                  onClick={() => toggleUnit(index)}
+                  style={{
+                    padding: 'var(--space-sm)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    background: isExpanded ? '#f8f9fa' : 'transparent',
+                    borderBottom: isExpanded ? '1px solid #ddd' : 'none'
+                  }}
+                >
+                  <div style={{ display: 'flex', gap: 'var(--space-md)', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <strong>{unit.bedroom_count || 'Unknown Bedrooms'}</strong>
+                    <span style={{ color: '#666' }}>•</span>
+                    <span>{unit.bathroom_count || 'Unknown Bathrooms'}</span>
+                    <span style={{ color: '#666' }}>•</span>
+                    <span style={{ color: '#2563eb', fontWeight: 'bold' }}>{unit.monthly_rent || 'Rent not reported'}</span>
+                    <span style={{ color: '#666' }}>•</span>
+                    <span>{unit.square_footage || 'Size not reported'}</span>
+                  </div>
+                  <span style={{ fontSize: '1.2em' }}>{isExpanded ? '▼' : '▶'}</span>
+                </div>
+
+                {/* Unit Details - Show when expanded */}
+                {isExpanded && (
+                  <div style={{ padding: 'var(--space-sm)' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
+                      {unit.occupancy_type && (
+                        <InfoRow label="Occupancy" value={unit.occupancy_type} />
+                      )}
+                      {unit.year_property_built && (
+                        <InfoRow label="Year Built" value={unit.year_property_built} />
+                      )}
+                      {unit.submission_year && (
+                        <InfoRow label="Data Year" value={unit.submission_year} />
+                      )}
+                      {unit.analysis_neighborhood && (
+                        <InfoRow label="Neighborhood" value={unit.analysis_neighborhood} />
+                      )}
+                      {unit.supervisor_district && (
+                        <InfoRow label="District" value={unit.supervisor_district} />
+                      )}
+                    </div>
+
+                    {/* Utilities Section */}
+                    <div style={{ padding: 'var(--space-sm)', background: '#f0f8ff', borderRadius: '4px' }}>
+                      <strong style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>Utilities Included in Rent:</strong>
+                      <div style={{ display: 'flex', gap: 'var(--space-md)', flexWrap: 'wrap', fontSize: '0.9em' }}>
+                        <span>{utilities.water_sewer ? '✅' : '❌'} Water/Sewer</span>
+                        <span>{utilities.natural_gas ? '✅' : '❌'} Gas</span>
+                        <span>{utilities.electricity ? '✅' : '❌'} Electricity</span>
+                        <span>{utilities.refuse_recycling ? '✅' : '❌'} Trash/Recycling</span>
+                      </div>
+                      {unit.base_rent_includes_other_utilities && (
+                        <div style={{ marginTop: 'var(--space-xs)', fontSize: '0.85em', color: '#666' }}>
+                          <strong>Other:</strong> {unit.base_rent_includes_other_utilities}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </section>
     );
   };

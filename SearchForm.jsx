@@ -15,6 +15,7 @@ function SearchForm({ onSearch, loading }) {
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [addressValid, setAddressValid] = useState(false);
   const [urlType, setUrlType] = useState(null); // 'craigslist', 'zillow', or null
+  const [selectedBlockLot, setSelectedBlockLot] = useState(null); // Store block/lot from Rent Board
   const inputRef = useRef(null);
 
   // Detect URL type for user feedback
@@ -29,9 +30,25 @@ function SearchForm({ onSearch, loading }) {
     return null;
   };
 
-  // Fetch address suggestions from DataSF
+  // Normalize address query for better matching (based on SF Planning GIS approach)
+  const normalizeAddressQuery = (query) => {
+    let normalized = query.toUpperCase().trim();
+
+    // Handle common ordinal abbreviations
+    normalized = normalized.replace(/\b(\d+)(ST|ND|RD|TH)\b/gi, '$1$2');
+
+    // Expand common directional abbreviations
+    normalized = normalized.replace(/\bN\b/g, 'NORTH')
+                           .replace(/\bS\b/g, 'SOUTH')
+                           .replace(/\bE\b/g, 'EAST')
+                           .replace(/\bW\b/g, 'WEST');
+
+    return normalized;
+  };
+
+  // Fetch address suggestions from SF Planning's Geocoder (ArcGIS)
   const fetchSuggestions = async (query) => {
-    if (!query || query.length < 3) {
+    if (!query || query.length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
       setLoadingSuggestions(false);
@@ -39,14 +56,32 @@ function SearchForm({ onSearch, loading }) {
     }
     setLoadingSuggestions(true);
     try {
+      // Normalize query for better matching
+      const normalizedQuery = normalizeAddressQuery(query);
+
+      // Query SF Planning's ArcGIS Geocoder
+      const encodedQuery = encodeURIComponent(normalizedQuery);
       const resp = await fetch(
-        `https://data.sfgov.org/resource/wr8u-xric.json?$select=address&$where=address like '%25${encodeURIComponent(query)}%25'&$limit=5`
+        `https://sfplanninggis.org/arcgiswa/rest/services/Geocoder_V2/MapServer/0/query?where=Address+like+'${encodedQuery}%25'&outFields=Address,Priority&returnGeometry=false&resultRecordCount=15&f=json`
       );
       const data = await resp.json();
-      const addrs = data.map((item) => item.address).filter(Boolean);
-      setSuggestions(addrs);
-      setShowSuggestions(addrs.length > 0);
+
+      // Filter by priority (1-2 are best matches, 3-4 are facilities/less relevant)
+      const features = data.features || [];
+      const prioritizedResults = features
+        .filter(f => f.attributes && f.attributes.Priority <= 3) // Include priority 1, 2, 3
+        .sort((a, b) => a.attributes.Priority - b.attributes.Priority) // Sort by priority
+        .slice(0, 10); // Limit to 10 results
+
+      const suggestions = prioritizedResults.map((item) => ({
+        address: item.attributes.Address,
+        priority: item.attributes.Priority
+      }));
+
+      setSuggestions(suggestions);
+      setShowSuggestions(suggestions.length > 0);
     } catch (e) {
+      console.error('Error fetching suggestions:', e);
       setSuggestions([]);
       setShowSuggestions(false);
     } finally {
@@ -64,12 +99,14 @@ function SearchForm({ onSearch, loading }) {
     const val = e.target.value;
     setAddress(val);
     setActiveSuggestion(-1);
+    setSelectedBlockLot(null); // Clear block/lot when user types
     fetchSuggestions(val);
     setAddressValid(false);
   };
 
   const handleSuggestionClick = (suggestion) => {
-    setAddress(suggestion);
+    setAddress(suggestion.address);
+    setSelectedBlockLot(null); // Clear block/lot since we're using full address now
     setShowSuggestions(false);
     setSuggestions([]);
     setActiveSuggestion(-1);
@@ -95,7 +132,9 @@ function SearchForm({ onSearch, loading }) {
     } else if (e.key === 'ArrowUp') {
       setActiveSuggestion((prev) => Math.max(prev - 1, 0));
     } else if (e.key === 'Enter' && activeSuggestion >= 0) {
-      setAddress(suggestions[activeSuggestion]);
+      const selected = suggestions[activeSuggestion];
+      setAddress(selected.address);
+      setSelectedBlockLot(null); // Clear block/lot since we're using full address now
       setShowSuggestions(false);
       setSuggestions([]);
       setActiveSuggestion(-1);
@@ -109,6 +148,7 @@ function SearchForm({ onSearch, loading }) {
     // If user enters parcel, clear address and suggestions
     if (e.target.value) {
       setAddress('');
+      setSelectedBlockLot(null);
       setSuggestions([]);
       setShowSuggestions(false);
       setAddressValid(false);
@@ -122,6 +162,7 @@ function SearchForm({ onSearch, loading }) {
       manual_laundry: manualLaundry,
       manual_parking: manualParking
     };
+
     if (url) {
       onSearch(url, address, parcel, manualAmenities);
     } else if (parcel) {
@@ -141,10 +182,10 @@ function SearchForm({ onSearch, loading }) {
       <div className="search-tips" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none', marginBottom: 'var(--space-md)' }}>
         <h3>Tips for best results:</h3>
         <ul>
-          <li><strong>Searching by parcel/lot number is much more reliable</strong> - use SF Planning GIS link above to find it</li>
-          <li>Include full street number and name when searching by address</li>
-          <li>Double-check address spelling</li>
-          <li>Only San Francisco addresses are supported</li>
+          <li><strong>Address autocomplete uses SF Planning's geocoder</strong> - all SF addresses supported</li>
+          <li>Start typing an address (min 2 characters) and select from dropdown</li>
+          <li>Addresses are validated against SF's official database</li>
+          <li>Blue/green border = best match, no border = alternative match</li>
         </ul>
       </div>
 
@@ -152,7 +193,7 @@ function SearchForm({ onSearch, loading }) {
         <div className="form-group" style={{ position: 'relative' }}>
           <label htmlFor="address" className="form-label">
             Street Address
-            <span className="label-hint">in San Francisco</span>
+            <span className="label-hint">all San Francisco addresses</span>
           </label>
           <input
             type="text"
@@ -189,15 +230,16 @@ function SearchForm({ onSearch, loading }) {
               )}
               {!loadingSuggestions && suggestions.map((s, i) => (
                 <li
-                  key={s}
+                  key={`${s.address}-${i}`}
                   style={{
                     padding: '8px',
                     background: i === activeSuggestion ? '#f5f5f5' : 'white',
                     cursor: 'pointer',
+                    borderLeft: s.priority === 1 ? '3px solid #2563eb' : s.priority === 2 ? '3px solid #10b981' : 'none'
                   }}
                   onMouseDown={() => handleSuggestionClick(s)}
                 >
-                  {s}
+                  {s.address}
                 </li>
               ))}
             </ul>

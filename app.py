@@ -294,40 +294,65 @@ def get_rent_board_housing_inventory(address=None, parcel=None):
     """
     try:
         url = "https://data.sfgov.org/resource/gdc7-dmcn.json"
-        params = {'$limit': 10, '$order': 'submission_year DESC'}
-        
+        params = {'$limit': 100, '$order': 'submission_year DESC'}  # Increased limit to get more units
+
         if parcel:
-            # Try to match by block number (first 4 digits of parcel)
-            block = parcel.split('/')[0] if '/' in parcel else parcel[:4]
+            # Parcel can be either "BLOCK/LOT" or just "BLOCK" from Rent Board
+            block = parcel.split('/')[0] if '/' in parcel else parcel
             block = block.zfill(4)
             params['block_num'] = block
             print(f"Querying Rent Board Inventory for block: {block}")
         elif address:
-            # Try to match by address - extract street name
-            norm_addr = normalize_address(address.split(',')[0])
-            addr_parts = norm_addr.split()
-            if len(addr_parts) >= 2:
-                street_name = ' '.join(addr_parts[1:])
-                params['$where'] = f"UPPER(block_address) LIKE UPPER('%{street_name}%')"
-                print(f"Querying Rent Board Inventory for street: {street_name}")
+            # Address could be block format like "2900 Block of JACKSON ST"
+            # or specific address - try to extract and match
+            if 'Block of' in address or 'BLOCK OF' in address.upper():
+                # Already in block format, use directly
+                params['block_address'] = address
+                print(f"Querying Rent Board Inventory for block address: {address}")
+            else:
+                # Convert to block format
+                norm_addr = normalize_address(address.split(',')[0])
+                addr_parts = norm_addr.split()
+                if len(addr_parts) >= 2:
+                    street_num = addr_parts[0]
+                    street_name = ' '.join(addr_parts[1:])
+                    # Round down to nearest 100
+                    block_num = (int(street_num) // 100) * 100
+                    block_query = f"{block_num} Block {street_name}"
+                    params['$where'] = f"UPPER(block_address) LIKE UPPER('%{block_query}%')"
+                    print(f"Querying Rent Board Inventory for block: {block_query}")
         else:
             return None
-        
+
         response = requests.get(url, params=params, timeout=10)
         print(f"Rent Board Inventory API response status: {response.status_code}")
-        
+        print(f"Rent Board Inventory API URL: {response.url}")
+
         if response.status_code == 200:
             data = response.json()
             print(f"Rent Board Inventory found {len(data)} records")
             if data and len(data) > 0:
+                # Get most recent year's data for each unique unit
+                # Group by bedroom/bathroom/sqft to identify unique units
+                unique_units = {}
+                for unit in data:
+                    key = f"{unit.get('bedroom_count')}_{unit.get('bathroom_count')}_{unit.get('square_footage')}"
+                    if key not in unique_units:
+                        unique_units[key] = unit
+                    else:
+                        # Keep most recent submission
+                        if int(unit.get('submission_year', 0)) > int(unique_units[key].get('submission_year', 0)):
+                            unique_units[key] = unit
+
                 return {
-                    'units_found': len(data),
-                    'units': data,
-                    'total_units': data[0].get('unit_count') if data else None
+                    'units_found': len(unique_units),
+                    'units': list(unique_units.values()),
+                    'total_units': data[0].get('unit_count') if data else None,
+                    'block_address': data[0].get('block_address') if data else None
                 }
-        
+
         return None
-        
+
     except Exception as e:
         print(f"Rent Board Housing Inventory error: {e}")
         import traceback
@@ -1023,22 +1048,22 @@ def search_property():
         address = data.get('address', '')
         parcel = data.get('parcel', '')
         debug = bool(data.get('debug'))
-        
+
         # Initialize listing amenities
         listing_amenities = {}
-        
+
         # If URL provided, try to extract address and parse listing
         if url:
             # Parse Craigslist listing for amenities
             if 'craigslist' in url.lower():
                 listing_amenities = parse_craigslist_listing(url)
-            
+
             # Try to extract address from URL
             if not address and not parcel:
                 extracted_address = extract_address_from_url(url)
                 if extracted_address:
                     address = extracted_address
-        
+
         if not address and not parcel:
             if listing_amenities:
                 return jsonify({
@@ -1046,8 +1071,11 @@ def search_property():
                     'data': {'listing_amenities': listing_amenities}
                 }), 200
             return jsonify({'error': 'Please provide an address or parcel/lot'}), 400
-        
-        # Get property details
+
+        # Log what we're searching with
+        print(f"Searching with - Address: {address}, Parcel: {parcel}")
+
+        # Get property details - parcel takes priority if provided
         property_details = get_property_details(address=address, parcel=parcel, debug=debug)
         
         if 'error' in property_details:
