@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(venv\\\\Scripts\\\\activate)",
+      "Bash(npm run *)",
+      "PowerShell(.\\\\venv\\\\Scripts\\\\Activate.ps1)",
+      "PowerShell(python app.py)",
+      "PowerShell(npm run dev)"
+    ]
+  }
+}

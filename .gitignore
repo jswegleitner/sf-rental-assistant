@@ -27,3 +27,6 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Claude Code per-machine permission approvals
+.claude/settings.local.json
