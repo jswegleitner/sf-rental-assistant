@@ -529,7 +529,6 @@ def get_buyout_agreements(address=None, parcel=None):
     except Exception as e:
         print(f"Buyout agreements error: {e}")
         return []
-CORS(app)
 
 # File-based storage for saved properties
 import json
